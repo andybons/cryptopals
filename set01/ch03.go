@@ -45,9 +45,9 @@ type scorer interface {
 }
 
 type frequencyScorer struct {
-	runeCount map[rune]int
-	runeTotal int
-	runeScore map[rune]float64
+	counts map[byte]int
+	total  int
+	scores map[byte]float64
 }
 
 func newFrequencyScorer() (*frequencyScorer, error) {
@@ -58,21 +58,21 @@ func newFrequencyScorer() (*frequencyScorer, error) {
 	defer f.Close()
 	rr := bufio.NewReader(f)
 	fs := &frequencyScorer{
-		runeCount: make(map[rune]int),
-		runeScore: make(map[rune]float64),
+		counts: make(map[byte]int),
+		scores: make(map[byte]float64),
 	}
 	for {
-		ch, _, err := rr.ReadRune()
+		ch, err := rr.ReadByte()
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return nil, err
 		}
-		fs.runeCount[ch]++
-		fs.runeTotal++
+		fs.counts[ch]++
+		fs.total++
 	}
-	for ch, n := range fs.runeCount {
-		fs.runeScore[ch] = float64(n) / float64(fs.runeTotal)
+	for ch, n := range fs.counts {
+		fs.scores[ch] = float64(n) / float64(fs.total)
 	}
 	return fs, nil
 }
@@ -80,7 +80,7 @@ func newFrequencyScorer() (*frequencyScorer, error) {
 func (fs *frequencyScorer) score(b []byte) float64 {
 	var s float64
 	for _, ch := range b {
-		s += fs.runeScore[rune(ch)]
+		s += fs.scores[ch]
 	}
 	return s
 }
