@@ -1,4 +1,4 @@
-package set01
+package cryptopals
 
 import (
 	"bufio"
@@ -34,6 +34,9 @@ func TestDetectAESinECB(t *testing.T) {
 			copy(best.line, b)
 			best.lineNum = lineNum
 		}
+	}
+	if got, want := best.blockDups, 4; got != want {
+		t.Errorf("Duplicate blocks = %d; want %d", got, want)
 	}
 	t.Logf("Line: %d; Block dupes: %d; %q", best.lineNum, best.blockDups, best.line)
 }

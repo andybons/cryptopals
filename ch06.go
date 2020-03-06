@@ -1,7 +1,6 @@
-package set01
+package cryptopals
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -20,8 +19,6 @@ func hammingDist(b1, b2 []byte) int {
 
 func crackRepeatingKeyXor(b []byte) (key []byte, err error) {
 	keysize := probableKeySize(b)
-	fmt.Println("Probable key size:", keysize)
-	fmt.Println("Length of cipher:", len(b))
 
 	// Now that you probably know the KEYSIZE: break the ciphertext
 	// into blocks of KEYSIZE length.
@@ -71,6 +68,5 @@ func probableKeySize(b []byte) int {
 			keylen = keysize
 		}
 	}
-	fmt.Printf("min dist: %f\tkeysize: %d\n", minDist, keylen)
 	return keylen
 }

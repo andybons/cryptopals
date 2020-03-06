@@ -1,4 +1,4 @@
-package set01
+package cryptopals
 
 import (
 	"encoding/hex"

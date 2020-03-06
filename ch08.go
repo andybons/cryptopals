@@ -1,4 +1,4 @@
-package set01
+package cryptopals
 
 func maxBlockDupeCount(b []byte, blockSize int) int {
 	m := make(map[string]int)
