@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-func fixedXor(h1, h2 []byte) ([]byte, error) {
+func fixedXorHex(h1, h2 []byte) ([]byte, error) {
 	if len(h1) != len(h2) {
 		return nil, errors.New("mismatched lengths")
 	}
@@ -18,10 +18,22 @@ func fixedXor(h1, h2 []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	for i := range b1 {
-		b1[i] = b1[i] ^ b2[i]
+	b, err := fixedXor(b1, b2)
+	if err != nil {
+		return nil, err
 	}
-	r := make([]byte, hex.EncodedLen(len(b1)))
-	n := hex.Encode(r, b1)
+	r := make([]byte, hex.EncodedLen(len(b)))
+	n := hex.Encode(r, b)
 	return r[:n], nil
+}
+
+func fixedXor(b1, b2 []byte) ([]byte, error) {
+	if len(b1) != len(b2) {
+		return nil, errors.New("mismatched lengths")
+	}
+	b := make([]byte, len(b1))
+	for i := range b {
+		b[i] = b1[i] ^ b2[i]
+	}
+	return b, nil
 }
