@@ -3,33 +3,74 @@ package cryptopals
 import (
 	"crypto/aes"
 	"crypto/rand"
-	"fmt"
 	"math/big"
 )
 
-func encryptionOracle(b []byte) ([]byte, error) {
+func encryptUsingRandomCipherMode(b []byte) ([]byte, cipherMode, error) {
 	pfx := make([]byte, randInt(5, 11))
 	if _, err := rand.Read(pfx); err != nil {
-		return nil, err
+		return nil, cipherModeUnknown, err
 	}
-	sfx := make([]byte, randInt(5, 10))
+	sfx := make([]byte, randInt(5, 11))
 	if _, err := rand.Read(sfx); err != nil {
-		return nil, err
+		return nil, cipherModeUnknown, err
 	}
 
 	padded := append(pfx, b...)
 	padded = append(padded, sfx...)
 
-	fmt.Printf("%q\n", padded)
-	fmt.Println(randCipherMode())
-	return nil, nil
+	key, err := randAESKey()
+	if err != nil {
+		return nil, cipherModeUnknown, err
+	}
+
+	var enc []byte
+	mode := randCipherMode()
+	switch mode {
+	case cipherModeECB:
+		enc, err = encryptAESinECB(padded, key)
+		if err != nil {
+			return nil, mode, err
+		}
+	case cipherModeCBC:
+		iv := make([]byte, aes.BlockSize)
+		if _, err := rand.Read(iv); err != nil {
+			return nil, mode, err
+		}
+		enc, err = encryptAESinCBC(padded, key, iv)
+		if err != nil {
+			return nil, mode, err
+		}
+	}
+	return enc, mode, nil
+}
+
+func detectCipherMode(b []byte) (cipherMode, error) {
+	if maxBlockDupeCount(b, aes.BlockSize) > 0 {
+		return cipherModeECB, nil
+	}
+	return cipherModeCBC, nil
 }
 
 type cipherMode int
 
+func (m cipherMode) String() string {
+	switch m {
+	case cipherModeECB:
+		return "ECB"
+	case cipherModeCBC:
+		return "CBC"
+	case cipherModeUnknown:
+		return "Unknown"
+	default:
+		panic("cipher mode not present in String() function")
+	}
+}
+
 const (
-	ecbMode cipherMode = iota
-	cbcMode
+	cipherModeECB cipherMode = iota
+	cipherModeCBC
+	cipherModeUnknown
 )
 
 func randCipherMode() cipherMode {
