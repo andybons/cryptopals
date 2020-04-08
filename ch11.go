@@ -45,11 +45,11 @@ func encryptUsingRandomCipherMode(b []byte) ([]byte, cipherMode, error) {
 	return enc, mode, nil
 }
 
-func detectCipherMode(b []byte) (cipherMode, error) {
+func detectCipherMode(b []byte) cipherMode {
 	if maxBlockDupeCount(b, aes.BlockSize) > 0 {
-		return cipherModeECB, nil
+		return cipherModeECB
 	}
-	return cipherModeCBC, nil
+	return cipherModeCBC
 }
 
 type cipherMode int
@@ -68,13 +68,13 @@ func (m cipherMode) String() string {
 }
 
 const (
-	cipherModeECB cipherMode = iota
+	cipherModeUnknown cipherMode = iota
+	cipherModeECB
 	cipherModeCBC
-	cipherModeUnknown
 )
 
 func randCipherMode() cipherMode {
-	return cipherMode(randInt(0, 2))
+	return cipherMode(randInt(1, 3))
 }
 
 func randInt(min, max int64) int {

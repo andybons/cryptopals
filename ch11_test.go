@@ -15,11 +15,7 @@ func TestDetectCipherMode(t *testing.T) {
 		if err != nil {
 			t.Fatalf("encryptUsingRandomCipherMode(%q): got unexpected error: %v", ciphertext, err)
 		}
-		dm, err := detectCipherMode(b)
-		if err != nil {
-			t.Fatalf("detectCipherMode got unexpected error: %v", err)
-		}
-		if got, want := dm, m; got != want {
+		if got, want := detectCipherMode(b), m; got != want {
 			t.Errorf("detectCipherMode = %v; want %v", got, want)
 			break
 		}
