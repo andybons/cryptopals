@@ -22,12 +22,16 @@ func TestParseURLQuery(t *testing.T) {
 	}
 }
 
-func TestEncodeURLQuery(t *testing.T) {
-	m := map[string]string{
-		"email": "foo@bar.com",
-		"uid":   "10",
-		"role":  "user",
+func TestProfileFor(t *testing.T) {
+	testCases := []struct {
+		email, want string
+	}{
+		{"foo@bar.com", "email=foo%40bar.com&role=user&uid=10"},
+		{"foo@bar.com&role=admin", "email=foo%40bar.com%26role%3Dadmin&role=user&uid=10"},
 	}
-	q := encodeURLQuery(m)
-	_ = q
+	for _, tc := range testCases {
+		if got, want := profileFor(tc.email), tc.want; got != want {
+			t.Errorf("profileFor(%+v) = %q; want %q", tc.email, got, want)
+		}
+	}
 }
