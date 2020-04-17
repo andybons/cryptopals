@@ -17,7 +17,8 @@ func TestEncryptAESinECB(t *testing.T) {
 	if err != nil {
 		t.Fatalf("encryptAESinECB(%q, %q): got expected error %v", ciphertext, key, err)
 	}
-	if err := decryptAESinECB(b, key); err != nil {
+	b, err = decryptAESinECB(b, key)
+	if err != nil {
 		t.Errorf("decryptAESinECB: got unexpected error %v", err)
 	}
 	if got, want := b[:len(ciphertext)], ciphertext; !bytes.Equal(got, want) {

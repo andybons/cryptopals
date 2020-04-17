@@ -21,7 +21,8 @@ func TestDecryptAESinECB(t *testing.T) {
 	}
 
 	key := []byte(`YELLOW SUBMARINE`)
-	if err := decryptAESinECB(b, key); err != nil {
+	b, err = decryptAESinECB(b, key)
+	if err != nil {
 		t.Errorf("decryptAESinECB: got unexpected error %v", err)
 	}
 	if got, want := b[:aes.BlockSize*2], []byte(`I'm back and I'm ringin' the bel`); !bytes.Equal(got, want) {
