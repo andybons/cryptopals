@@ -31,8 +31,8 @@ func TestProfileFor(t *testing.T) {
 	testCases := []struct {
 		email, want []byte
 	}{
-		{[]byte("foo@bar.com"), []byte("email=foo%40bar.com&role=user&uid=10")},
-		{[]byte("foo@bar.com&role=admin"), []byte("email=foo%40bar.com%26role%3Dadmin&role=user&uid=10")},
+		{[]byte("foo@bar.com"), []byte("email=foo%40bar.com&uid=10&role=user")},
+		{[]byte("foo@bar.com&role=admin"), []byte("email=foo%40bar.com%26role%3Dadmin&uid=10&role=user")},
 	}
 	for _, tc := range testCases {
 		if got, want := profileFor(tc.email), tc.want; !bytes.Equal(got, want) {
@@ -47,16 +47,22 @@ func TestEncryptDecryptUserProfile(t *testing.T) {
 		t.Fatalf("rand.Read: got unexpected error: %v", err)
 	}
 
-	var b []byte
-	for i := 0; i < aes.BlockSize*2; i++ {
-		em := make([]byte, i)
-		var err error
-		b, err = profileOracle(em, key)
-		if err != nil {
-			t.Errorf("profileOracle: got unexpected error: %v", err)
-		}
-		t.Logf("Len of encrypted: %d", len(b))
+	b, err := profileOracle([]byte(`andybo@gmail.com`), key)
+	if err != nil {
+		t.Errorf("profileOracle: got unexpected error: %v", err)
 	}
+
+	// Encrypted bytes will equal:
+	// email=andybo%40gmail.com&uid=10&role=user*******
+	// ----------------++++++++++++++++----------------
+
+	// Replace last block.
+	enc, err := encryptAESinECB([]byte(`role=admin`), key)
+	if err != nil {
+		t.Errorf("encryptAESinECB: got unexpected error: %v", err)
+	}
+
+	copy(b[aes.BlockSize*2:aes.BlockSize*3], enc)
 
 	dec, err := decryptAESinECB(b, key)
 	if err != nil {
@@ -70,12 +76,4 @@ func TestEncryptDecryptUserProfile(t *testing.T) {
 		t.Errorf(`m["role"] = %q; want %q`, got, want)
 	}
 	t.Logf("%+v", m)
-
-	// Using only the user input to profile_for() (as an oracle to generate "valid"
-	// ciphertexts) and the ciphertexts themselves, make a role=admin profile.
-
-}
-
-func profileOracle(email, key []byte) ([]byte, error) {
-	return encryptAESinECB(profileFor(email), key)
 }
