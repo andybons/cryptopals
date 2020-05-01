@@ -34,10 +34,16 @@ func profileFor(email []byte) []byte {
 
 func encodeURLQuery(m map[string]interface{}) []byte {
 	return []byte(fmt.Sprintf("email=%s&uid=%s&role=%s",
-		url.QueryEscape(fmt.Sprint(m["email"])),
-		url.QueryEscape(fmt.Sprint(m["uid"])),
-		url.QueryEscape(fmt.Sprint(m["role"])),
+		stripMetas(fmt.Sprint(m["email"])),
+		stripMetas(fmt.Sprint(m["uid"])),
+		stripMetas(fmt.Sprint(m["role"])),
 	))
+}
+
+func stripMetas(s string) string {
+	s = strings.ReplaceAll(s, "&", "")
+	s = strings.ReplaceAll(s, "=", "")
+	return s
 }
 
 func profileOracle(email, key []byte) ([]byte, error) {
